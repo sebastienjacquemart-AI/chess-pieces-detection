@@ -1,3 +1,13 @@
+# chess-board-detection
+Our method finds the characteristic structures in an image, such as lines and lattice points, and then assesses their locations and shapes based on a scoring function called polyscore (cf. Section 3.4). The values of the polyscore function define the temperature of each point in the heat map. Based on these polyscore values, we can identify components representing a single chessboard
+
+## Detecting straight lines
+SLID is an extension of the standard line detector. Its additional objective is to merge all small segments that are nearly collinear into long straight lines. There are several line detectors that can be applied to solve this problem. More satisfactory results can be achieved by the Canny Lines detector [26], which is the detector that we decided to utilize in our method.
+
+Our proposed SLID algorithm consists of three main steps: 1. Boosting: find all possible segments; 2. Grouping: separate segments into groups of nearly collinear segment; 3. Merging: analyze and merge the segments in each group.
+
+# chess-piece-recognition
+
 # chess-pieces-detection
 
 https://medium.com/@daylenyang/building-chess-id-99afa57326cd (2016)
