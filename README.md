@@ -14,6 +14,19 @@ https://xiaohulugo.github.io/papers/CannyLine_Line_Detection_ICIP2015.pdf
 
 https://github.com/Vincentqyw/LineSegmentsDetection
 
+### Linking
+The linking function analyzes two segments AB and CD and attempts to determine if they are located and oriented in such manner that they can be treated as a single straight line segment.
+
+### Merging
+
+## Detecting Lattice Points
+The LAPS algorithm takes a 21 × 21 matrix whose elements represent pixels as an input. The preprocessed matrix is handled by two modules: (1) a simple geometric detector that recognizes only perfect cases and (2) a neural network for recognizing deformed and distorted patterns. First, for the geometric detector, if the result is positive, we assume that it represents a chessboard lattice point. Otherwise, we utilize the neural network detector because its result definitively determines if the matrix represents a chessboard lattice point.
+
+### Geometric detector
+This detector utilizes the following algorithm: (1) add a 1-pixel-width frame of the back-ground color (black) around the input matrix, (2) perform morphological erosion, (3) find all contours and (4) check if the contour resembles a rhomboid
+
+### neural detector
+
 # chess-piece-recognition
 
 # chess-pieces-detection
