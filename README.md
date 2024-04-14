@@ -6,6 +6,14 @@ SLID is an extension of the standard line detector. Its additional objective is 
 
 Our proposed SLID algorithm consists of three main steps: 1. Boosting: find all possible segments; 2. Grouping: separate segments into groups of nearly collinear segment; 3. Merging: analyze and merge the segments in each group.
 
+### Boosting
+One effective method for boosting the detection of line segments is to adaptively adjust the low and high thresholds of the Canny operator based on the gradient magnitude of the input
+image.
+https://docs.opencv.org/4.x/da/d22/tutorial_py_canny.html
+https://xiaohulugo.github.io/papers/CannyLine_Line_Detection_ICIP2015.pdf
+
+https://github.com/Vincentqyw/LineSegmentsDetection
+
 # chess-piece-recognition
 
 # chess-pieces-detection
