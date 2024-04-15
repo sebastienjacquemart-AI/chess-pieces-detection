@@ -20,7 +20,9 @@ The linking function analyzes two segments AB and CD and attempts to determine i
 ### Merging
 
 ## Detecting Lattice Points
-The LAPS algorithm takes a 21 × 21 matrix whose elements represent pixels as an input. The preprocessed matrix is handled by two modules: (1) a simple geometric detector that recognizes only perfect cases and (2) a neural network for recognizing deformed and distorted patterns. First, for the geometric detector, if the result is positive, we assume that it represents a chessboard lattice point. Otherwise, we utilize the neural network detector because its result definitively determines if the matrix represents a chessboard lattice point.
+The LAPS algorithm takes a 21 × 21 matrix whose elements represent pixels as an input. To verify if an (x, y) point in an image is a chessboard lattice point, it utilizes a sub-image
+with coordinates ranging from (x −10, y−10) to (x +10, y+10). Then, the algorithm preprocesses this matrix utilizing the following steps: (1) conversion to grayscale, (2) application
+of Otsu method altered by Jassim and Altaani [20], (3) application of Canny detector, and (4) binarization. The preprocessed matrix is handled by two modules: (1) a simple geometric detector that recognizes only perfect cases and (2) a neural network for recognizing deformed and distorted patterns. First, for the geometric detector, if the result is positive, we assume that it represents a chessboard lattice point. Otherwise, we utilize the neural network detector because its result definitively determines if the matrix represents a chessboard lattice point.
 
 ### Geometric detector
 This detector utilizes the following algorithm: (1) add a 1-pixel-width frame of the back-ground color (black) around the input matrix, (2) perform morphological erosion, (3) find all contours and (4) check if the contour resembles a rhomboid
