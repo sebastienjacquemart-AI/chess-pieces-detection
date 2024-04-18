@@ -17,7 +17,7 @@ class LineDetection:
     
     def canny_pf(self, img):
         return
-    
+    #cott
     def hough(self, img, edges):
         line_image = np.copy(img) * 0
 
@@ -32,7 +32,7 @@ class LineDetection:
 
         return lines_edges
     
-    def get_intersections():
+    def intersections():
         return
     
     def linking_function(self, edges, p, A):
