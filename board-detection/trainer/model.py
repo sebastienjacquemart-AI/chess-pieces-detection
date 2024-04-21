@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+from collections import defaultdict
 
 import cv2 as cv
 import numpy as np
@@ -17,23 +18,41 @@ class LineDetection:
     
     def canny_pf(self, img):
         return
-    #cott
-    def hough(self, img, edges):
-        line_image = np.copy(img) * 0
 
+    def hough(self, edges):
         lines = cv.HoughLinesP(edges, 1, np.pi/180, 60, minLineLength=300, maxLineGap=70)
 
         assert lines is not None, "no lines found in the image, check hough params"
-        for line in lines:
-            for x1,y1,x2,y2 in line:
-                cv.line(line_image,(x1,y1),(x2,y2),(255,0,0),5)
-        
-        lines_edges = cv.addWeighted(img, 0.8, line_image, 1, 0)
 
-        return lines_edges
+        return lines
     
-    def intersections():
-        return
+    def intersections(self, lines):
+        def segment_by_angle(lines):
+            # returns angles in [0, pi] in radians
+            angles = np.array([np.radians(line[0][1]) for line in lines])
+            # multiply the angles by two and find coordinates of that angle
+            pts = np.array([[np.cos(angle), np.sin(angle)]
+                            for angle in angles], dtype=np.float32)
+
+            # run kmeans on the coords
+            default_criteria_type = cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER
+            labels, centers = cv.kmeans(pts, 2, None, (default_criteria_type, 10, 1.0), cv.KMEANS_RANDOM_CENTERS, 10)[1:]
+            labels = labels.reshape(-1)  # transpose to row vec
+
+            for angle, label, pt in zip(angles, labels, pts):
+                print(angle, label, pt)
+
+            colors = ['r', 'g', 'b']  # Define colors for each label
+            for label_id in range(len(colors)):
+                label_indices = np.where(labels == label_id)[0]
+                plt.scatter(pts[label_indices, 0], pts[label_indices, 1], c=colors[label_id], label=f'Label {label_id}')
+            plt.show()
+
+            return labels
+        
+        segmented = segment_by_angle(lines)
+
+        return segmented
     
     def linking_function(self, edges, p, A):
         def get_omega():
@@ -50,12 +69,30 @@ class LineDetection:
             return
         
 
-class Plot:
+class Visualisation:
     def __init__(self):
         pass
 
-    def plot_image(self, img, title):
-        plt.subplot(121),plt.imshow(img,cmap = 'gray')
-        plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+    def lines(self, img, lines, labels=None):
+        gray = np.copy(img)
+        line_image = cv.cvtColor(gray,cv.COLOR_GRAY2RGB)
+        #line_image = np.copy(img) #* 0
 
-        plt.show()
+        color_dict = {
+            0: (255,0,0),
+            1: (0,255,0),
+            2: (0,0,255)
+        }
+
+        if labels is None:
+            labels = [1] * len(lines)
+
+        for line, label in zip(lines, labels):
+            for x1,y1,x2,y2 in line:
+                cv.line(line_image,(x1,y1),(x2,y2),color_dict[label],5)
+        
+        #lines_edges = cv.addWeighted(img, 0.8, line_image, 1, 0)
+
+        #cv.imshow("skt",line_image)
+
+        return line_image
