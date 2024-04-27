@@ -2,9 +2,7 @@ TODO: Could improve the detection of the lines OR improve clustering. Should als
 
 # Progress
 
-Step 1: board detection
-
-I'm able to detect the lines of the chess board and find the intersections between the lines. 
+Step 1: board detection. I'm able to detect the lines of the chess board and find the intersections between the lines. 
 
 Method: Blur image, canny detector, hough lines, cluster lines based on angle, find intersection.
 
