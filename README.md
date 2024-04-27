@@ -1,4 +1,4 @@
-TODO: Could improve the detection of the lines OR improve clustering. Should also hard-code detection of lines less. 
+TODO: Could improve the detection of the lines OR improve clustering. Should also hard-code detection of lines less. Also, add theory about canny, hough...
 
 # Progress
 
