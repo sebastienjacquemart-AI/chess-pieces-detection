@@ -1,3 +1,18 @@
+TODO: Could improve the detection of the lines OR improve clustering. Should also hard-code detection of lines less. 
+
+# Progress
+
+Step 1: board detection
+
+I'm able to detect the lines of the chess board and find the intersections between the lines. 
+
+Method: Blur image, canny detector, hough lines, cluster lines based on angle, find intersection.
+
+Here are some images: 
+![pipeline](intersections_img_pipeline.png)
+![clustering](intersections_angle_clustering.png)
+
+
 # chess-board-detection
 Our method finds the characteristic structures in an image, such as lines and lattice points, and then assesses their locations and shapes based on a scoring function called polyscore (cf. Section 3.4). The values of the polyscore function define the temperature of each point in the heat map. Based on these polyscore values, we can identify components representing a single chessboard
 
