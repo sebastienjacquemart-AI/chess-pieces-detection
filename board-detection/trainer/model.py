@@ -114,15 +114,39 @@ class LineDetection:
             return cv.convexHull(points)
         
         def surface_area(hull):
+            x, y, w, h = cv.boundingRect(hull)
 
+            rectangle_area = w * h
+
+            # Calculate area of each triangle and subtract from rectangle area
+            triangles_area = 0
+            print(len(hull))
+            for i in range(len(hull)):
+                # Get consecutive points forming the hull
+                p1 = hull[i]
+                p2 = hull[(i + 1) % len(hull)]
+
+                # Calculate area of triangle formed by hull edge and rectangle
+                triangle_area = 0.5 * abs((x*(p1[1] - p2[1]) + p1[0]*(p2[1] - y) + p2[0]*(y - p1[1])))
+                triangles_area += triangle_area
+
+            # Subtract area of triangles from rectangle area to get hull surface area
+            hull_area = rectangle_area - triangles_area
+            return hull_area
         
         def alpha(hull):
             return np.sqrt(surface_area(hull))/7
+        
+        def centroid(points):
+            return
 
         hull = convex_hull(intersections)
+        x,y,w,h = surface_area(hull)
+
 
         plt.scatter(intersections[:,0], intersections[:,1]) 
         plt.plot(hull[:, 0, 0], hull[:, 0, 1], color='green', linewidth=2, linestyle='-', label='Convex Hull')
+
         plt.show()
 
         return 
