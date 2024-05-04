@@ -39,7 +39,7 @@ class LineDetection:
             labels, centers = cv.kmeans(pts, 2, None, (default_criteria_type, 10, 1.0), cv.KMEANS_RANDOM_CENTERS, 10)[1:]
             labels = labels.reshape(-1)  # transpose to row ve
 
-            colors = ['r', 'g', 'b']  # Define colors for each label
+            colors = ['r', 'g', 'b']  ### MAKE METHOD ###
             for label_id in range(len(colors)):
                 label_indices = np.where(labels == label_id)[0]
                 plt.scatter(pts[label_indices, 0], pts[label_indices, 1], c=colors[label_id], label=f'Label {label_id}')
@@ -62,7 +62,7 @@ class LineDetection:
             b = np.array([[rho1], [rho2]])
             x0, y0 = np.linalg.solve(A, b)
             x0, y0 = int(np.round(x0)), int(np.round(y0))
-            return [x0, y0]
+            return (x0, y0)
 
 
         def segmented_intersections(lines, labels):
@@ -83,12 +83,25 @@ class LineDetection:
                 for line2 in lines_group2:
                     intersections.append(intersection(line1, line2))
 
-            return intersections
+            return np.array(intersections)
         
         labels = segment_by_angle(lines)
         intersections = segmented_intersections(lines, labels)
 
+        intersections_x = [x[0] for x in intersections] #### MAKE METHOD
+        intersections_y = [x[1] for x in intersections]
+
+        plt.scatter(intersections_x, intersections_y) 
+        plt.show()
+
         return labels, intersections
+    
+    def hull(self, points):
+        hull = cv.convexHull(points)
+
+
+
+        return hull
     
 
 
@@ -111,7 +124,7 @@ class Visualisation:
     def __init__(self):
         pass
 
-    def lines(self, img, lines, labels=None, intersections=None):
+    def lines(self, img, lines, hull, labels=None, intersections=None, drawLines=True, drawIntersections=True, drawHull=True):
         gray = np.copy(img)
         line_image = cv.cvtColor(gray, cv.COLOR_GRAY2RGB)
 
@@ -124,25 +137,29 @@ class Visualisation:
             labels = [1] * len(lines)
 
         # Draw lines
-        for line, label in zip(lines, labels):
-            for rho, theta in line:
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a * rho
-                y0 = b * rho
+        if drawLines:
+            for line, label in zip(lines, labels):
+                for rho, theta in line:
+                    a = np.cos(theta)
+                    b = np.sin(theta)
+                    x0 = a * rho
+                    y0 = b * rho
 
-                length = 2000
-                x1 = int(x0 + length * (-b))
-                y1 = int(y0 + length * (a))
-                x2 = int(x0 - length * (-b))
-                y2 = int(y0 - length * (a))
+                    length = 2000
+                    x1 = int(x0 + length * (-b))
+                    y1 = int(y0 + length * (a))
+                    x2 = int(x0 - length * (-b))
+                    y2 = int(y0 - length * (a))
 
-                cv.line(line_image, (x1, y1), (x2, y2), color_dict[label], 5)
+                    cv.line(line_image, (x1, y1), (x2, y2), color_dict[label], 5)
 
         # Draw intersections if provided
-        if intersections is not None:
+        if intersections is not None and drawIntersections:
             for intersection in intersections:
-                cv.circle(line_image, (int(intersection[0]), int(intersection[1])), 5, (0, 0, 255), -1)
+                cv.circle(line_image, (int(intersection[0]), int(intersection[1])), 2, (0, 0, 255), -1)
+
+        if hull is not None and drawHull:
+            cv.polylines(line_image, [hull], True, (0, 255, 0), 2)
 
         return line_image
 

@@ -16,7 +16,10 @@ blur_edges = linedetection.canny(blur, 100, 200)
 lines = linedetection.hough(blur_edges)
 
 labels, intersections = linedetection.intersections(lines)
-lines_edges = visualisation.lines(img, lines, labels=labels, intersections=intersections)
+hull = linedetection.hull(intersections)
+
+lines_edges = visualisation.lines(img, lines, hull, labels=labels, intersections=intersections, drawLines=False)
+
 
 plt.subplot(221),plt.imshow(img,cmap = 'gray')
 plt.title('Original Image'), plt.xticks([]), plt.yticks([])
@@ -25,6 +28,6 @@ plt.title('Blurred Image'), plt.xticks([]), plt.yticks([])
 plt.subplot(223),plt.imshow(blur_edges,cmap = 'gray')
 plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
 plt.subplot(224),plt.imshow(lines_edges)
-plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+plt.title('Line Image'), plt.xticks([]), plt.yticks([])
  
 plt.show()
