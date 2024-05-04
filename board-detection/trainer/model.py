@@ -7,26 +7,23 @@ import numpy as np
 class LineDetection:
     def __init__(self):
         pass
-
-    def gaussian_blur(self, img, kernel_size):
-        blurred_img = cv.GaussianBlur(img,(kernel_size, kernel_size),0)
-        return blurred_img
-
-    def canny(self, img, low_tresh, high_tresh):
-        edges = cv.Canny(img,low_tresh,high_tresh)
-        return edges
     
-    def canny_pf(self, img):
-        return
+    def intersections(self, img):
+        def canny(img, low_tresh, high_tresh):
+            edges = cv.Canny(img,low_tresh,high_tresh)
+            return edges
+        
+        def gaussian_blur(img, kernel_size):
+            blurred_img = cv.GaussianBlur(img,(kernel_size, kernel_size),0)
+            return blurred_img
+        
+        def hough(edges):
+            lines = cv.HoughLines(edges, 2, np.pi/180, 160) #, minLineLength=300, maxLineGap=70)
 
-    def hough(self, edges):
-        lines = cv.HoughLines(edges, 2, np.pi/180, 160) #, minLineLength=300, maxLineGap=70)
+            assert lines is not None, "no lines found in the image, check hough params"
 
-        assert lines is not None, "no lines found in the image, check hough params"
-
-        return lines
+            return lines
     
-    def intersections(self, lines):
         def segment_by_angle(lines):
             # returns angles in [0, pi] in radians
             angles = np.array([line[0][1] for line in lines])
@@ -84,27 +81,54 @@ class LineDetection:
                     intersections.append(intersection(line1, line2))
 
             return np.array(intersections)
-        
+
+        blur = gaussian_blur(img, 3)
+
+        blur_edges = canny(blur, 100, 200)
+
+        lines = hough(blur_edges)
+
         labels = segment_by_angle(lines)
+        
         intersections = segmented_intersections(lines, labels)
 
-        intersections_x = [x[0] for x in intersections] #### MAKE METHOD
-        intersections_y = [x[1] for x in intersections]
+        visualisation = Visualisation() ### A BIT WEIRD
+        lines_edges = visualisation.lines(img, lines, labels=labels, intersections=intersections)
 
-        plt.scatter(intersections_x, intersections_y) 
+
+        plt.subplot(221),plt.imshow(img,cmap = 'gray') ### MAKE METHOD
+        plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(222),plt.imshow(blur,cmap = 'gray')
+        plt.title('Blurred Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(223),plt.imshow(blur_edges,cmap = 'gray')
+        plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(224),plt.imshow(lines_edges,cmap = 'gray')
+        plt.title('Line Image'), plt.xticks([]), plt.yticks([])
+        
         plt.show()
 
-        return labels, intersections
+        return lines, labels, intersections
     
-    def hull(self, points):
-        hull = cv.convexHull(points)
+    def border(self, lines, labels, intersections):
+        def convex_hull(points):
+            return cv.convexHull(points)
+        
+        def surface_area(hull):
+
+        
+        def alpha(hull):
+            return np.sqrt(surface_area(hull))/7
+
+        hull = convex_hull(intersections)
+
+        plt.scatter(intersections[:,0], intersections[:,1]) 
+        plt.plot(hull[:, 0, 0], hull[:, 0, 1], color='green', linewidth=2, linestyle='-', label='Convex Hull')
+        plt.show()
+
+        return 
 
 
-
-        return hull
     
-
-
     def linking_function(self, edges, p, A):
         def get_omega():
             return (np.pi/2)*(1/A**(-4))
@@ -124,7 +148,7 @@ class Visualisation:
     def __init__(self):
         pass
 
-    def lines(self, img, lines, hull, labels=None, intersections=None, drawLines=True, drawIntersections=True, drawHull=True):
+    def lines(self, img, lines, labels=None, intersections=None, drawLines=True, drawIntersections=True):
         gray = np.copy(img)
         line_image = cv.cvtColor(gray, cv.COLOR_GRAY2RGB)
 
@@ -157,9 +181,6 @@ class Visualisation:
         if intersections is not None and drawIntersections:
             for intersection in intersections:
                 cv.circle(line_image, (int(intersection[0]), int(intersection[1])), 2, (0, 0, 255), -1)
-
-        if hull is not None and drawHull:
-            cv.polylines(line_image, [hull], True, (0, 255, 0), 2)
 
         return line_image
 
