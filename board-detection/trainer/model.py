@@ -110,42 +110,65 @@ class LineDetection:
         return lines, labels, intersections
     
     def border(self, lines, labels, intersections):
-        def convex_hull(points):
-            return cv.convexHull(points)
-        
-        def surface_area(hull):
-            x, y, w, h = cv.boundingRect(hull)
+        def approx_hull(points):
+            hull = cv.convexHull(points)
 
+            epsilon = 0.02 * cv.arcLength(hull, True)
+            approx = cv.approxPolyDP(hull, epsilon, True)
+            if len(approx) > 4:
+                # Perform simplification using the Douglas-Peucker algorithm
+                approx = cv.approxPolyDP(approx, 0.01 * cv.arcLength(hull, True), True)
+            return approx
+        
+        def bounding_rect(hull):
+            return cv.boundingRect(hull)
+        
+        def surface_area(bound, hull):
+            x, y, w, h = bound
+
+            # Define corner points of the bounding rectangle
+            bound_p1 = np.array([x, y])
+            bound_p2 = np.array([x + h, y])
+            bound_p3 = np.array([x + h, y + w])
+            bound_p4 = np.array([x, y + w])
+
+            # Define corner points of the convex hull
+            hull_p1 = hull[2, 0, :]
+            hull_p2 = hull[1, 0, :]
+            hull_p3 = hull[0, 0, :]
+            hull_p4 = hull[3, 0, :]
+
+            # Compute area of the bounding rectangle
             rectangle_area = w * h
 
-            # Calculate area of each triangle and subtract from rectangle area
-            triangles_area = 0
-            print(len(hull))
-            for i in range(len(hull)):
-                # Get consecutive points forming the hull
-                p1 = hull[i]
-                p2 = hull[(i + 1) % len(hull)]
+            # Compute area of the convex hull
+            hull_area = rectangle_area
 
-                # Calculate area of triangle formed by hull edge and rectangle
-                triangle_area = 0.5 * abs((x*(p1[1] - p2[1]) + p1[0]*(p2[1] - y) + p2[0]*(y - p1[1])))
-                triangles_area += triangle_area
+            # Subtract the areas of triangles formed by hull and bounding rectangle vertices
+            hull_area -= abs(np.cross(bound_p2 - bound_p1, hull_p1 - bound_p1)) / 2
+            hull_area -= abs(np.cross(bound_p3 - bound_p2, hull_p2 - bound_p2)) / 2
+            hull_area -= abs(np.cross(bound_p4 - bound_p3, hull_p3 - bound_p3)) / 2
+            hull_area -= abs(np.cross(bound_p1 - bound_p4, hull_p4 - bound_p4)) / 2
 
-            # Subtract area of triangles from rectangle area to get hull surface area
-            hull_area = rectangle_area - triangles_area
             return hull_area
-        
+
         def alpha(hull):
             return np.sqrt(surface_area(hull))/7
         
         def centroid(points):
             return
 
-        hull = convex_hull(intersections)
-        x,y,w,h = surface_area(hull)
+        hull = approx_hull(intersections)
+        bound = bounding_rect(hull)
 
+        print(surface_area(bound, hull))
 
+        
         plt.scatter(intersections[:,0], intersections[:,1]) 
         plt.plot(hull[:, 0, 0], hull[:, 0, 1], color='green', linewidth=2, linestyle='-', label='Convex Hull')
+
+        rect = plt.Rectangle((bound[0], bound[1]), bound[2], bound[3], edgecolor='red', linewidth=2, facecolor='none', label='Bounding Rectangle')
+        plt.gca().add_patch(rect)
 
         plt.show()
 
