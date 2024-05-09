@@ -110,7 +110,7 @@ class LineDetection:
         return lines, labels, intersections
     
     def border(self, lines, labels, intersections):
-        def approx_hull(points):
+        def get_approx_hull(points):
             hull = cv.convexHull(points)
 
             epsilon = 0.02 * cv.arcLength(hull, True)
@@ -120,10 +120,12 @@ class LineDetection:
                 approx = cv.approxPolyDP(approx, 0.01 * cv.arcLength(hull, True), True)
             return approx
         
-        def bounding_rect(hull):
+        def get_bounding_rect(hull):
             return cv.boundingRect(hull)
         
-        def surface_area(bound, hull):
+        def get_surface_area(hull):
+            bound = get_bounding_rect(hull)
+
             x, y, w, h = bound
 
             # Define corner points of the bounding rectangle
@@ -152,23 +154,31 @@ class LineDetection:
 
             return hull_area
 
-        def alpha(hull):
-            return np.sqrt(surface_area(hull))/7
+        def get_alpha(surface_area):
+            return np.sqrt(surface_area)/7
         
-        def centroid(points):
-            return
+        def get_centroid(points):
+            mean_x = np.mean(points[:, 0])
+            mean_y = np.mean(points[:, 1])
 
-        hull = approx_hull(intersections)
-        bound = bounding_rect(hull)
+            centroid = [mean_x, mean_y]
 
-        print(surface_area(bound, hull))
+            return centroid
+
+        hull = get_approx_hull(intersections)
+
+        surface_area = get_surface_area(hull)
+
+        center = get_centroid(intersections)
+
+        alpha = get_alpha(surface_area)
+
+        print(alpha)
 
         
         plt.scatter(intersections[:,0], intersections[:,1]) 
+        plt.scatter(center[0], center[1])
         plt.plot(hull[:, 0, 0], hull[:, 0, 1], color='green', linewidth=2, linestyle='-', label='Convex Hull')
-
-        rect = plt.Rectangle((bound[0], bound[1]), bound[2], bound[3], edgecolor='red', linewidth=2, facecolor='none', label='Bounding Rectangle')
-        plt.gca().add_patch(rect)
 
         plt.show()
 
